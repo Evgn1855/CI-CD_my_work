@@ -1,0 +1,30 @@
+pipeline {
+ agent any
+ environment {
+    // Добавляем путь к Go в начало системного PATH
+    PATH = "/usr/local/go/bin:${env.PATH}"
+    // Если приложению нужен настроенный GOPATH, можно раскомментировать строку ниже:
+    // GOPATH = "${WORKSPACE}/go"
+  }
+ stages {
+    stage('Git') {
+   steps {
+        checkout([$class: 'GitSCM',
+          branches: [[name: '*/main']],
+          userRemoteConfigs: [[url: 'https://github.com/Evgn1855/sdvps-materials.git']]
+        ])
+      }
+    }
+    stage('Test') {
+   steps {
+    sh 'go test .'
+      }
+    }
+    stage('Build') {
+   steps {
+    sh 'go build -o hello-world:v$BUILD_NUMBER .'
+    sh 'curl -u admin:12345678 http://192.168.0.104:8081/repository/my_raw-hosted/ --upload-file hello-world:v$BUILD_NUMBER'
+      }
+    }
+  }
+}
