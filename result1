@@ -1,0 +1,110 @@
+Started by user LashevichEE
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Running on Jenkins in /var/jenkins_home/workspace/pipeline_netology
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Git)
+[Pipeline] git
+The recommended git tool is: NONE
+No credentials specified
+ > git rev-parse --resolve-git-dir /var/jenkins_home/workspace/pipeline_netology/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/Evgn1855/sdvps-materials.git # timeout=10
+Fetching upstream changes from https://github.com/Evgn1855/sdvps-materials.git
+ > git --version # timeout=10
+ > git --version # 'git version 2.47.3'
+ > git fetch --tags --force --progress -- https://github.com/Evgn1855/sdvps-materials.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/master^{commit} # timeout=10
+Checking out Revision da5acf7bcb7f437637adf06fbd03a24dc2c8f13e (refs/remotes/origin/master)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f da5acf7bcb7f437637adf06fbd03a24dc2c8f13e # timeout=10
+ > git branch -a -v --no-abbrev # timeout=10
+ > git branch -D master # timeout=10
+ > git checkout -b master da5acf7bcb7f437637adf06fbd03a24dc2c8f13e # timeout=10
+Commit message: "branch main, add creds for vagrant box"
+ > git rev-list --no-walk da5acf7bcb7f437637adf06fbd03a24dc2c8f13e # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] sh
++ go test .
+ok  	github.com/netology-code/sdvps-materials	0.006s
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Build)
+[Pipeline] sh
++ docker build . -t ubuntu-bionic:8082/hello-world:v5
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  246.8kB
+
+Step 1/8 : FROM golang:1.16 AS builder
+ ---> 5f6a4662de3e
+Step 2/8 : WORKDIR $GOPATH/src/github.com/netology-code/sdvps-materials
+ ---> Using cache
+ ---> 5f03926ea604
+Step 3/8 : COPY . ./
+ ---> aeaec812b8ad
+Step 4/8 : RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix nocgo -o /app .
+ ---> Running in a2b2a1154cfc
+ ---> Removed intermediate container a2b2a1154cfc
+ ---> d97aa14574d5
+Step 5/8 : FROM alpine:latest
+ ---> 28bd5fe8b56d
+Step 6/8 : RUN apk -U add ca-certificates
+ ---> Using cache
+ ---> b4cd4674670e
+Step 7/8 : COPY --from=builder /app /app
+ ---> Using cache
+ ---> fcc2e9c88f99
+Step 8/8 : CMD ["/app"]
+ ---> Using cache
+ ---> 1e2071f57242
+Successfully built 1e2071f57242
+Successfully tagged ubuntu-bionic:8082/hello-world:v5
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Push)
+[Pipeline] sh
++ docker login ubuntu-bionic:8082 -u admin -p 12345678
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+Login Succeeded
++ docker push ubuntu-bionic:8082/hello-world:v5
+The push refers to repository [ubuntu-bionic:8082/hello-world]
+52adbae37fcf: Waiting
+55afa1ecc21d: Waiting
+d60a032c5c7a: Waiting
+52adbae37fcf: Waiting
+55afa1ecc21d: Waiting
+d60a032c5c7a: Waiting
+52adbae37fcf: Waiting
+55afa1ecc21d: Waiting
+d60a032c5c7a: Waiting
+d60a032c5c7a: Waiting
+52adbae37fcf: Waiting
+55afa1ecc21d: Waiting
+52adbae37fcf: Waiting
+55afa1ecc21d: Waiting
+d60a032c5c7a: Waiting
+52adbae37fcf: Layer already exists
+55afa1ecc21d: Layer already exists
+d60a032c5c7a: Layer already exists
+v5: digest: sha256:1e2071f5724221bc2243c6977f1d136d51a985f0bb173f4f22ebcba640a8764f size: 973
++ docker logout
+Removing login credentials for https://index.docker.io/v1/
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: SUCCESS
